@@ -29,7 +29,7 @@ const getUnassignedTasks = (): Promise<Task[]> => {
       sendImmediately: true,
     },
     qs: {
-      "responsible-party-ids": "none",
+      completed: false
     },
     json: true,
   };

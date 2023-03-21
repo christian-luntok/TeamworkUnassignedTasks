@@ -48,9 +48,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var dotenv = require("dotenv");
-dotenv.config();
 var request = require("request");
 var webhook_1 = require("@slack/webhook");
+dotenv.config();
 // Set up Slack webhook
 var slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
 var slackWebhook = new webhook_1.IncomingWebhook(slackWebhookUrl);
@@ -59,14 +59,14 @@ var teamworkApiKey = process.env.TEAMWORK_API_KEY;
 // Make API call to Teamwork API to retrieve list of unassigned tasks
 var getUnassignedTasks = function () {
     var requestOptions = {
-        url: 'https://jaladesign.teamwork.com/tasks.json',
+        url: "https://jaladesign.teamwork.com/tasks.json",
         auth: {
             user: teamworkApiKey,
-            pass: '',
+            pass: "",
             sendImmediately: true,
         },
         qs: {
-            'responsible-party-ids': 'none',
+            completed: false
         },
         json: true,
     };
@@ -77,7 +77,7 @@ var getUnassignedTasks = function () {
             }
             else {
                 // Filter list of tasks to only include unassigned tasks
-                var unassignedTasks = body['todo-items'].filter(function (task) { return !task['responsible-party-id']; });
+                var unassignedTasks = body["todo-items"].filter(function (task) { return !task["responsible-party-id"]; });
                 resolve(unassignedTasks);
             }
         });
@@ -89,7 +89,7 @@ var getProjectName = function (taskId) {
         url: "https://jaladesign.teamwork.com/tasks/".concat(taskId, ".json"),
         auth: {
             user: teamworkApiKey,
-            pass: '',
+            pass: "",
             sendImmediately: true,
         },
         json: true,
@@ -100,7 +100,7 @@ var getProjectName = function (taskId) {
                 reject(error);
             }
             else {
-                resolve(body['todo-item']['project-name']);
+                resolve(body["todo-item"]["project-name"]);
             }
         });
     });
@@ -128,14 +128,14 @@ var sendUnassignedTasksToSlack = function () { return __awaiter(void 0, void 0, 
                     }); }))];
             case 2:
                 tasksWithProjectName = _a.sent();
-                message_1 = 'List of unassigned tasks:\n';
+                message_1 = "List of unassigned tasks:\n";
                 tasksWithProjectName.forEach(function (task) {
                     message_1 += "\u2022 Project: ".concat(task.projectName, " - ").concat(task.content, " \n");
                 });
                 return [4 /*yield*/, slackWebhook.send(message_1)];
             case 3:
                 result = _a.sent();
-                console.log('Message sent to Slack');
+                console.log("Message sent to Slack");
                 return [2 /*return*/, result];
             case 4:
                 error_1 = _a.sent();
