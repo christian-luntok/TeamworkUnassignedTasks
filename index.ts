@@ -1,15 +1,31 @@
 import * as dotenv from "dotenv";
 import * as request from "request";
 import { IncomingWebhook, IncomingWebhookResult } from "@slack/webhook";
+import * as yargs from "yargs";
 
-dotenv.config();
+// dotenv.config();
+const argv = yargs
+  .option("SLACK_WEBHOOK_URL", {
+    demandOption: true,
+    describe: "Slack webhook URL",
+    type: "string",
+  })
+  .option("TEAMWORK_API_KEY", {
+    demandOption: true,
+    describe: "Teamwork API key",
+    type: "string",
+  })
+  .help()
+  .alias("help", "h").argv;
 
 // Set up Slack webhook
-const slackWebhookUrl: string = process.env.SLACK_WEBHOOK_URL!;
+// const slackWebhookUrl: string = process.env.SLACK_WEBHOOK_URL!;
+const slackWebhookUrl: string = argv.SLACK_WEBHOOK_URL!;
 const slackWebhook: IncomingWebhook = new IncomingWebhook(slackWebhookUrl);
 
 // Set up Teamwork API credentials
-const teamworkApiKey: string = process.env.TEAMWORK_API_KEY!;
+// const teamworkApiKey: string = process.env.TEAMWORK_API_KEY!;
+const teamworkApiKey: string = argv.TEAMWORK_API_KEY!;
 
 interface Task {
   id: string;
