@@ -17,28 +17,23 @@ const argv = yargs
 
 // Set up Slack webhook
 // const slackWebhookUrl: string = process.env.SLACK_WEBHOOK_URL!;
-const slackWebhookUrl: string = argv.SLACK_WEBHOOK_URL!;
-const slackWebhook: IncomingWebhook = new IncomingWebhook(slackWebhookUrl);
+const SLACK_WEBHOOK_URL: string = argv.SLACK_WEBHOOK_URL!;
+const SLACK_WEBHOOK: IncomingWebhook = new IncomingWebhook(SLACK_WEBHOOK_URL);
 
 // Set up Teamwork API credentials
 // const teamworkApiKey: string = process.env.TEAMWORK_API_KEY!;
-const teamworkApiKey: string = argv.TEAMWORK_API_KEY!;
-
-type TaskProjectName = {
-	projectName: string;
-	id: string;
-	content: string;
-};
+const TEAMWORK_API_KEY: string = argv.TEAMWORK_API_KEY!;
 
 type Task = {
+  projectName?: string;
 	id: string;
 	content: string;
 };
 
 // Make API call to Teamwork API to retrieve list of unassigned tasks
-const getUnassignedTasks = async (): Promise<Task[]> => {
+async function getUnassignedTasks (): Promise<Task[]> {
 	const response = await fetch('https://jaladesign.teamwork.com/tasks.json', {
-		headers: { Authorization: teamworkApiKey },
+		headers: { Authorization: TEAMWORK_API_KEY },
 	});
 
 	if (!response.ok) {
@@ -50,9 +45,9 @@ const getUnassignedTasks = async (): Promise<Task[]> => {
 };
 
 // Make API call to Teamwork API to retrieve project name for a task
-const getProjectName = async (taskId: string): Promise<string> => {
+async function getProjectName (taskId: string): Promise<string> {
 	const response = await fetch(`https://jaladesign.teamwork.com/tasks/${taskId}.json`, {
-		headers: { Authorization: teamworkApiKey },
+		headers: { Authorization: TEAMWORK_API_KEY },
 	});
 
 	if (!response.ok) {
@@ -64,27 +59,23 @@ const getProjectName = async (taskId: string): Promise<string> => {
 };
 
 // Main function that retrieves list of unassigned tasks and sends a message to Slack
-const sendUnassignedTasksToSlack = async (): Promise<IncomingWebhookResult> => {
+async function sendUnassignedTasksToSlack (): Promise<IncomingWebhookResult> {
 	try {
 		// Retrieve list of unassigned tasks
 		const unassignedTasks: Task[] = await getUnassignedTasks();
 
 		// Get project name for each task
-		const tasksWithProjectName: TaskProjectName[] = await Promise.all(
+		const tasksWithProjectName: Task[] = await Promise.all(
 			unassignedTasks.map(async (task: Task) => {
 				const projectName: string = await getProjectName(task.id);
 				return { ...task, projectName };
 			})
 		);
 
-		// Format message
-		let message: string = 'List of unassigned tasks:\n';
-		tasksWithProjectName.forEach((task: TaskProjectName) => {
-			message += `• Project: ${task.projectName} - ${task.content} \n`;
-		});
+    const message = formatTasks(tasksWithProjectName)
 
 		// Send message to Slack
-		const result: IncomingWebhookResult = await slackWebhook.send(message);
+		const result: IncomingWebhookResult = await SLACK_WEBHOOK.send(message);
 		console.log('Message sent to Slack');
 		return result;
 	} catch (error) {
@@ -92,6 +83,16 @@ const sendUnassignedTasksToSlack = async (): Promise<IncomingWebhookResult> => {
 		throw error;
 	}
 };
+
+function formatTasks(tasks: Task[]) {
+  // Format message
+  let message: string = 'List of unassigned tasks:\n';
+  tasks.forEach((task: Task) => {
+    message += `• Project: ${task.projectName} - ${task.content} \n`;
+  });
+  return message
+}
+
 
 // Call main function
 sendUnassignedTasksToSlack();
