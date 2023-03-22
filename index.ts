@@ -51,7 +51,7 @@ async function getProjectName (taskId: string): Promise<string> {
 	});
 
 	if (!response.ok) {
-		throw Error('Could not get task list');
+		throw Error('Could not get task');
 	}
 
 	const task = await response.json();
