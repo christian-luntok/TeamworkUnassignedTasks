@@ -1,4 +1,3 @@
-import * as request from 'request';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import * as yargs from 'yargs';
 
