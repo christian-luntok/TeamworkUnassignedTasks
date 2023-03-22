@@ -1,9 +1,7 @@
-import * as dotenv from "dotenv";
 import * as request from "request";
 import { IncomingWebhook, IncomingWebhookResult } from "@slack/webhook";
 import * as yargs from "yargs";
 
-// dotenv.config();
 const argv = yargs
   .option("SLACK_WEBHOOK_URL", {
     demandOption: true,
